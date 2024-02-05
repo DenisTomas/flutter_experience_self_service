@@ -1,5 +1,5 @@
 import 'package:fe_lab_clinicas_core/fe_lab_clinicas_core.dart';
-import 'package:fe_lab_clinicas_self_service/src/modules/auth/login/login_controler.dart';
+import 'package:fe_lab_clinicas_self_service/src/modules/auth/login/login_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_getit/flutter_getit.dart';
 import 'package:signals_flutter/signals_flutter.dart';
@@ -12,11 +12,22 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends State<LoginPage> with MessageViewMixin {
   final formKey = GlobalKey<FormState>();
   final emailEC = TextEditingController();
   final passwordEC = TextEditingController();
-  final controller = Injector.get<LoginControler>();
+  final controller = Injector.get<LoginController>();
+
+  @override
+  void initState() {
+    messageListener(controller);
+    effect(() {
+      if (controller.logged) {
+        Navigator.of(context).pushReplacementNamed('/home');
+      }
+    });
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -91,16 +102,20 @@ class _LoginPageState extends State<LoginPage> {
                       height: 32,
                     ),
                     SizedBox(
-                        width: sizeOf.width * .8,
-                        height: 48,
-                        child: ElevatedButton(
-                            onPressed: () {
-                              final valid =
-                                  formKey.currentState?.validate() ?? false;
+                      width: sizeOf.width * .8,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          final valid =
+                              formKey.currentState?.validate() ?? false;
 
-                              if (valid) {}
-                            },
-                            child: const Text('Entrar'))),
+                          if (valid) {
+                            controller.login(emailEC.text, passwordEC.text);
+                          }
+                        },
+                        child: const Text('Entrar'),
+                      ),
+                    ),
                   ],
                 ),
               ),
